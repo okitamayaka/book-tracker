@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -336,6 +337,105 @@ body {
 }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
+/* ── Edit modal ── */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(42,31,26,0.5);
+  z-index: 300;
+  align-items: flex-end;
+  justify-content: center;
+}
+.modal-overlay.show { display: flex; }
+.modal-sheet {
+  background: var(--surface);
+  border-radius: 20px 20px 0 0;
+  padding: 0 0 calc(20px + var(--safe-bottom));
+  width: 100%;
+  max-width: 600px;
+  animation: slideUp 0.25s ease;
+}
+@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+.modal-handle {
+  width: 36px; height: 4px;
+  background: var(--border-strong);
+  border-radius: 2px;
+  margin: 10px auto 16px;
+}
+.modal-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 16px 14px;
+  border-bottom: 0.5px solid var(--border);
+  margin-bottom: 16px;
+}
+.modal-title { font-size: 16px; font-weight: 600; color: var(--brown); }
+.modal-close {
+  background: none; border: none;
+  font-size: 22px; color: var(--text-muted);
+  cursor: pointer; padding: 4px;
+}
+.modal-body { padding: 0 16px; display: flex; flex-direction: column; gap: 12px; }
+.modal-cover-row { display: flex; gap: 14px; align-items: flex-start; margin-bottom: 4px; }
+.modal-cover {
+  width: 72px; height: 100px;
+  border-radius: 6px;
+  background: var(--brown-pale);
+  border: 0.5px solid var(--border);
+  flex-shrink: 0;
+  overflow: hidden;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--brown-light); font-size: 28px;
+}
+.modal-cover img { width: 100%; height: 100%; object-fit: cover; }
+.modal-field { display: flex; flex-direction: column; gap: 4px; flex: 1; }
+.modal-label { font-size: 11px; color: var(--text-muted); font-weight: 500; letter-spacing: 0.3px; }
+.modal-input, .modal-select {
+  width: 100%;
+  padding: 9px 12px;
+  font-size: 15px;
+  font-family: inherit;
+  border: 0.5px solid var(--border-strong);
+  border-radius: 10px;
+  background: var(--bg);
+  color: var(--text);
+  -webkit-appearance: none;
+}
+.modal-input:focus, .modal-select:focus {
+  outline: none;
+  border-color: var(--accent);
+  background: var(--surface);
+}
+.modal-actions { display: flex; gap: 8px; padding: 16px 16px 0; }
+.btn-save {
+  flex: 1; padding: 13px;
+  background: var(--accent); color: #fff;
+  border: none; border-radius: 12px;
+  font-size: 15px; font-weight: 600; font-family: inherit;
+  cursor: pointer;
+}
+.btn-save:active { opacity: 0.8; }
+.btn-delete-modal {
+  padding: 13px 16px;
+  background: none; color: #c0392b;
+  border: 0.5px solid rgba(192,57,43,0.3);
+  border-radius: 12px;
+  font-size: 14px; font-family: inherit;
+  cursor: pointer;
+}
+
+/* edit button on book items */
+.edit-btn {
+  background: none; border: none;
+  color: var(--brown-light);
+  font-size: 18px;
+  padding: 6px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.edit-btn:active { color: var(--accent); }
+.item-actions { display: flex; gap: 0; }
+
 /* ── Progress page ── */
 .progress-title { font-size: 16px; font-weight: 600; color: var(--brown); margin-bottom: 14px; }
 .progress-chart-wrap { background: var(--surface); border: 0.5px solid var(--border); border-radius: 14px; padding: 16px; margin-bottom: 16px; }
@@ -452,6 +552,54 @@ body {
   </div>
 </div>
 
+<!-- Edit Modal -->
+<div class="modal-overlay" id="edit-modal" onclick="closeEditModal(event)">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <span class="modal-title">本の情報を編集</span>
+      <button class="modal-close" onclick="closeEditModal()" aria-label="閉じる"><i class="ti ti-x" aria-hidden="true"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-cover-row">
+        <div class="modal-cover" id="edit-cover"><i class="ti ti-book" aria-hidden="true"></i></div>
+        <div style="flex:1; display:flex; flex-direction:column; gap:10px;">
+          <div class="modal-field">
+            <div class="modal-label">タイトル</div>
+            <input class="modal-input" id="edit-title" type="text" placeholder="書籍タイトル">
+          </div>
+          <div class="modal-field">
+            <div class="modal-label">著者</div>
+            <input class="modal-input" id="edit-author" type="text" placeholder="著者名">
+          </div>
+        </div>
+      </div>
+      <div class="modal-field">
+        <div class="modal-label">ジャンル</div>
+        <select class="modal-select" id="edit-genre">
+          <option>ビジネス</option>
+          <option>自己啓発</option>
+          <option>投資・お金</option>
+          <option>小説</option>
+          <option>実用</option>
+          <option>技術・IT</option>
+          <option>健康・医療</option>
+          <option>歴史・教養</option>
+          <option>その他</option>
+        </select>
+      </div>
+      <div class="modal-field">
+        <div class="modal-label">読了日</div>
+        <input class="modal-input" id="edit-date" type="date">
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-save" id="edit-save-btn"><i class="ti ti-check" aria-hidden="true" style="margin-right:4px"></i>保存する</button>
+      <button class="btn-delete-modal" id="edit-delete-btn"><i class="ti ti-trash" aria-hidden="true"></i></button>
+    </div>
+  </div>
+</div>
+
 <!-- Tab bar -->
 <div class="tabbar">
   <button class="tab-btn active" data-tab="home">
@@ -533,7 +681,10 @@ function bookItemHTML(book, showDel = true) {
           <span class="book-date-label">${ds}</span>
         </div>
       </div>
-      ${showDel ? `<button class="del-btn" onclick="deleteBook('${book.id}')" aria-label="削除"><i class="ti ti-trash" aria-hidden="true"></i></button>` : ''}
+      ${showDel ? `<div class="item-actions">
+        <button class="edit-btn" onclick="openEditModal('${book.id}')" aria-label="編集"><i class="ti ti-pencil" aria-hidden="true"></i></button>
+        <button class="del-btn" onclick="deleteBook('${book.id}')" aria-label="削除"><i class="ti ti-trash" aria-hidden="true"></i></button>
+      </div>` : ''}
     </div>`;
 }
 
@@ -623,8 +774,73 @@ function deleteBook(id) {
   if (!confirm('この本を削除しますか？')) return;
   books = books.filter(b => b.id !== id);
   save(); updateStats(); renderRecent(); renderLibrary();
+  closeEditModal();
   toast('削除しました');
 }
+
+// ── Edit modal ──
+let editingId = null;
+
+function openEditModal(id) {
+  const book = books.find(b => b.id === id);
+  if (!book) return;
+  editingId = id;
+
+  // cover
+  const coverEl = document.getElementById('edit-cover');
+  coverEl.innerHTML = book.img
+    ? `<img src="${book.img}" alt="">`
+    : '<i class="ti ti-book" aria-hidden="true"></i>';
+
+  document.getElementById('edit-title').value = book.title || '';
+  document.getElementById('edit-author').value = book.author || '';
+  document.getElementById('edit-genre').value = book.genre || 'その他';
+
+  // date as YYYY-MM-DD for input[type=date]
+  const d = new Date(book.date);
+  const pad = n => String(n).padStart(2,'0');
+  document.getElementById('edit-date').value = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+
+  document.getElementById('edit-modal').classList.add('show');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeEditModal(e) {
+  if (e && e.target !== document.getElementById('edit-modal')) return;
+  document.getElementById('edit-modal').classList.remove('show');
+  document.body.style.overflow = '';
+  editingId = null;
+}
+
+document.getElementById('edit-save-btn').addEventListener('click', () => {
+  if (!editingId) return;
+  const title = document.getElementById('edit-title').value.trim();
+  const author = document.getElementById('edit-author').value.trim();
+  const genre = document.getElementById('edit-genre').value;
+  const dateVal = document.getElementById('edit-date').value;
+
+  if (!title) { toast('タイトルを入力してください'); return; }
+
+  const idx = books.findIndex(b => b.id === editingId);
+  if (idx === -1) return;
+
+  books[idx] = {
+    ...books[idx],
+    title, author, genre,
+    date: dateVal ? new Date(dateVal).toISOString() : books[idx].date
+  };
+
+  save(); updateStats(); renderRecent(); renderLibrary();
+  document.getElementById('edit-modal').classList.remove('show');
+  document.body.style.overflow = '';
+  editingId = null;
+  toast('保存しました ✓');
+});
+
+document.getElementById('edit-delete-btn').addEventListener('click', () => {
+  if (!editingId) return;
+  deleteBook(editingId);
+});
 
 // ── Camera / AI ──
 let pendingImg = null;
